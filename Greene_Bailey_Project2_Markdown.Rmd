@@ -7,9 +7,9 @@ output: word_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
-	echo = FALSE,
-	message = FALSE,
-	warning = FALSE
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE
 )
 library(tidyverse)
 here::i_am("Greene_Bailey_Project2_Markdown.Rmd")
@@ -28,7 +28,7 @@ I created a function named clean_air_quality() that can be used on all three air
   
 ```{r data cleaning, message=FALSE, warning=FALSE, include=FALSE}
 # all data sets are csv with no head or tail rows to remove
-# NA = NA
+# missing entered as NA
 # date is in mmddyyy format
 # some dates have multiple readings
 AQ_2018 <- read_csv(here("data", "AQ_2018.csv"))
@@ -65,9 +65,8 @@ clean_air_quality <- function(df) {
              ))
     ) |>
     # return columns to original order
-    select(Date, Daily_Max_8hr_CO, units_CO, Daily_Mean_PM2.5, units_PM, 
-           Daily_Max_8hr_Ozone, units_O3)
-  
+    select(Date, Daily_Max_8hr_CO, units_CO, Daily_Mean_PM2.5,
+           units_PM, Daily_Max_8hr_Ozone, units_O3)
   return(df_clean)
 }
 
@@ -84,7 +83,7 @@ AQ_All_Years <- bind_rows(AQ_2018_Clean, AQ_2019_Clean, AQ_2020_Clean)
   
 ## Carbon Monoxide and Ozone Plot
   
-```{r CO and O3 plot, fig.width=12, fig.height=8}
+```{r CO and O3 plot, fig.width=15, fig.height=10}
 # calculate monthly averages for CO
 monthly_CO <- AQ_All_Years |>
   # convert date to month name
@@ -94,7 +93,8 @@ monthly_CO <- AQ_All_Years |>
   # calculate mean, SE, and CI
   summarise(
     mean_conc = mean(Daily_Max_8hr_CO, na.rm = TRUE),
-    se = sd(Daily_Max_8hr_CO, na.rm = TRUE) / sqrt(sum(!is.na(Daily_Max_8hr_CO))),
+    se = sd(Daily_Max_8hr_CO, na.rm = TRUE) /
+      sqrt(sum(!is.na(Daily_Max_8hr_CO))),
     ci_lower = mean_conc - 1.96 * se,
     ci_upper = mean_conc + 1.96 * se,
     .groups = "drop"
@@ -109,7 +109,8 @@ monthly_O3 <- AQ_All_Years |>
   # calculate mean, se, and CI
   summarise(
     mean_conc = mean(Daily_Max_8hr_Ozone, na.rm = TRUE),
-    se = sd(Daily_Max_8hr_Ozone, na.rm = TRUE) / sqrt(sum(!is.na(Daily_Max_8hr_Ozone))),
+    se = sd(Daily_Max_8hr_Ozone, na.rm = TRUE) /
+      sqrt(sum(!is.na(Daily_Max_8hr_Ozone))),
     ci_lower = mean_conc - 1.96 * se,
     ci_upper = mean_conc + 1.96 * se,
     .groups = "drop"
@@ -149,7 +150,8 @@ ggplot(monthly_combined, aes(x = Month,
   # set y-axis scales
   scale_y_continuous(
     name = "CO Concentration (ppm)",
-    sec.axis = sec_axis(~ . / scale_factor, name = expression(O[3]~"Concentration (ppm)"))
+    sec.axis = sec_axis(~ . / scale_factor,
+                        name = expression(O[3]~"Concentration (ppm)"))
   ) +
   # title chart and note data limitations
   labs(
@@ -159,7 +161,7 @@ ggplot(monthly_combined, aes(x = Month,
     caption = "Note: 2020 data is only through April"
   ) +
   # set background theme
-  theme_minimal() +
+  theme_minimal(base_size = 16) +
   # # format axes and legend
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1),
@@ -174,7 +176,7 @@ ggplot(monthly_combined, aes(x = Month,
   
 ## Particulate Matter Plot
   
-```{r PM2.5 plot, fig.width=12, fig.height=8}
+```{r PM2.5 plot, fig.width=15, fig.height=10}
 # prepare PM2.5 data
 pm25_data <- AQ_All_Years |>
   mutate(
@@ -212,7 +214,7 @@ ggplot(pm25_data, aes(x = Month, y = mean_conc, color = Year, group = Year)) +
     caption = "Note: 2020 data is only through April"
   ) +
   # set theme
-  theme_minimal() +
+  theme_minimal(base_size = 16) +
   # finalize formatting
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1),
